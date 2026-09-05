@@ -1,0 +1,29 @@
+name: Deploy Node.js to VPS
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm install 20
+            nvm use 20
+            echo "Deploying Node.js app..."
+            cd ~/vps-ps/vps-prectice/backend || exit 1
+            git pull origin main || exit 1
+            npm install --production || exit 1
+            pm2 restart backend-ad || pm2 start index.js --name backend-ad
+            pm2 save
+            echo "Deployment finished successfully ✅"
