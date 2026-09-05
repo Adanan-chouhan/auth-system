@@ -1,0 +1,1 @@
+// Empty Decorator - Public Route
